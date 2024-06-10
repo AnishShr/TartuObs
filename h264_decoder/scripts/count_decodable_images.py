@@ -77,9 +77,9 @@ class CountDecodables:
         print(f"Decodable rear left images: {count_rear_left_images}")
         print(f"Decodable rear right images: {count_rear_right_images}")
         print("----------------------------------------")
-        
+
 
 if __name__ == "__main__":
-    flow_compute = CountDecodables()
-    flow_compute.process_bag()
+    count_decoded = CountDecodables()
+    count_decoded.process_bag()
     
