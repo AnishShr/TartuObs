@@ -30,17 +30,8 @@ class H264Decoder:
 class CountDecodables:
 
     def __init__(self):
-        self.bag_path = "/home/adl/obs_ws/src/h264_decoder/bags/_2023-06-29-12-21-44_70.bag"
-        
-        self.topics = [h264_front_left_camera_topic,
-                       h264_front_right_camera_topic,
-                       h264_rear_left_camera_topic,
-                       h264_rear_right_camera_topic]
-        
-        # self.topics = [h264_front_left_camera_topic,
-        #                h264_front_right_camera_topic]
-        
-        self.decoder = H264Decoder()
+        self.bag_path = "/home/adl/obs_ws/src/h264_decoder/bags/_2023-06-28-12-23-25_37.bag"
+
 
     def process_bag(self):
         bag = rosbag.Bag(self.bag_path, 'r')
@@ -50,35 +41,33 @@ class CountDecodables:
         count_rear_left_images = 0
         count_rear_right_images = 0
 
-        for topic, msg, t in bag.read_messages(topics=self.topics):             
-            
-            if topic == h264_front_left_camera_topic:
-                img_frame = self.h264_decode(msg)
-                
-                if img_frame is not None:
-                    count_front_left_images += 1
-                    print("Front left image decoded")
-            
-            elif topic == h264_front_right_camera_topic:
-                img_frame = self.h264_decode(msg)
-                
-                if img_frame is not None:
-                    count_front_right_images += 1
-                    print("Front right image decoded")
-            
-            elif topic == h264_rear_left_camera_topic:
-                img_frame = self.h264_decode(msg)
-                
-                if img_frame is not None:
-                    count_rear_left_images += 1
-                    print("Rear left image decoded")
+        decoder = H264Decoder()
+        for _, msg, _ in bag.read_messages(topics=h264_front_left_camera_topic):
+            frames = decoder.decode(msg.data)        
+    
+            if len(frames) > 0:
+                count_front_left_images += 1
 
-            elif topic == h264_rear_right_camera_topic:
-                img_frame = self.h264_decode(msg)
-                
-                if img_frame is not None:
-                    count_rear_right_images += 1
-                    print("Rear right image decoded")
+        decoder = H264Decoder()
+        for _, msg, _ in bag.read_messages(topics=h264_front_right_camera_topic):
+            frames = decoder.decode(msg.data)        
+    
+            if len(frames) > 0:
+                count_front_right_images += 1
+        
+        decoder = H264Decoder()
+        for _, msg, _ in bag.read_messages(topics=h264_rear_left_camera_topic):
+            frames = decoder.decode(msg.data)        
+    
+            if len(frames) > 0:
+                count_rear_left_images += 1
+
+        decoder = H264Decoder()
+        for _, msg, _ in bag.read_messages(topics=h264_rear_right_camera_topic):
+            frames = decoder.decode(msg.data)        
+    
+            if len(frames) > 0:
+                count_rear_right_images += 1
 
 
         print("Finished processing bag...")
@@ -88,17 +77,7 @@ class CountDecodables:
         print(f"Decodable rear left images: {count_rear_left_images}")
         print(f"Decodable rear right images: {count_rear_right_images}")
         print("----------------------------------------")
-
-
-    def h264_decode(self, msg):
-        frames = self.decoder.decode(msg.data)
-
-        if len(frames) == 0:
-            return
-
-        frame = cv2.cvtColor(frames[0].to_rgb().to_ndarray(), cv2.COLOR_RGB2BGR)
-
-        return frame
+        
 
 if __name__ == "__main__":
     flow_compute = CountDecodables()
